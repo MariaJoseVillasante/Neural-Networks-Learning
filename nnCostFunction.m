@@ -63,20 +63,33 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 
+X = [ones(m,1) X]; %5000 x 401 =A1
+Z2 = Theta1* X'; %25 x5000 debiera ser m x h
+A2 = sigmoid(Z2)'; %5000 x 25
+A2 = [ones(size(A2,1), 1) A2];% 5000 x 26
+Z3 = Theta2*A2'; %10 x 5000
+h = sigmoid(Z3)'; %5000 x 10
 
+% Transform y from integers in 1:10 into vectors which would be returned by the
+% output layer
+c = 1:num_labels;
+y2 = (c==y);
+J1 = (1/m)*sum(sum(-y2.*log(h) - (1-y2).*log(1-h)));
 
+Theta1(:,1)=0;
+Theta2(:,1)=0;
+reg1 = (lambda/(2*m))*(sum(sum(Theta1.^2)) + sum(sum(Theta2.^2)));
+J = J1 + reg1;
 
+D3 = h - y2; % m x r A3=y2, 5000 x 10 r:number of output clasification
 
+D2 = ((Theta2(:,2:end))'*D3') .* sigmoidGradient(Z2); % 25 x 5000 ^
 
+De1 = D2 * (X); % size is (h x m) ⋅ (m x n) --> (h x n) ^'
+De2 = D3' * (A2);%size is (r x m) ⋅ (m x [h+1]) --> (r x [h+1])
 
-
-
-
-
-
-
-
-
+Theta1_grad = De1./m + (lambda/m)*Theta1;
+Theta2_grad = De2./m + (lambda/m)*Theta2;
 
 
 
